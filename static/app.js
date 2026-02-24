@@ -62,16 +62,23 @@ async function triggerFetch() {
 
     await fetch("/api/fetch", { method: "POST" });
 
-    // Poll for completion
-    setTimeout(async () => {
+    // Poll for completion (give collectors time to run)
+    let polls = 0;
+    const pollInterval = setInterval(async () => {
+        polls++;
         await refreshAll();
-        btn.disabled = false;
-        btn.textContent = "Fetch Now";
+        if (polls >= 6) {
+            clearInterval(pollInterval);
+            btn.disabled = false;
+            btn.textContent = "Fetch Now";
+        }
     }, 5000);
 }
 
 async function refreshAll() {
     await Promise.all([loadPlatforms(), loadTopKeywords(), loadTrends()]);
+    const el = document.getElementById("last-updated");
+    if (el) el.textContent = `Updated ${new Date().toLocaleTimeString()}`;
 }
 
 // ── Rendering ──
@@ -87,7 +94,7 @@ function renderPlatformBar() {
         <div class="platform-chip ${state.platform === p.name ? 'active' : ''}"
              onclick="filterPlatform('${p.name}')">
             <span class="dot ${p.configured ? 'connected' : 'disconnected'}"></span>
-            <span>${capitalize(p.name)}</span>
+            <span>${platformLabel(p.name)}</span>
             ${p.trends_found ? `<span style="color:var(--text-dim);font-size:11px">(${p.trends_found})</span>` : ''}
         </div>
     `).join("");
@@ -111,7 +118,7 @@ function renderTopKeywords() {
     const items = state.topKeywords.map((t, i) => {
         const barWidth = Math.max(4, (t.max_relevance / 100) * 120);
         const platforms = t.platforms.map(p =>
-            `<span class="badge badge-${p}">${p}</span>`
+            `<span class="badge badge-${p}">${platformLabel(p)}</span>`
         ).join(" ");
 
         return `
@@ -121,7 +128,7 @@ function renderTopKeywords() {
                     <div style="margin-top:4px">${platforms}</div>
                 </div>
                 <div class="kw-meta">
-                    <span>${formatNum(t.total_engagement)} engagement</span>
+                    <span>${formatNum(t.total_engagement)} eng.</span>
                     <span>${t.post_count} posts</span>
                     <span class="kw-score">${t.max_relevance}</span>
                     <span class="score-bar" style="width:${barWidth}px"></span>
@@ -134,6 +141,8 @@ function renderTopKeywords() {
 
 function renderTrendFeed() {
     const container = document.getElementById("trend-feed");
+    const countEl = document.getElementById("trend-count");
+    if (countEl) countEl.textContent = `${state.trends.length} results`;
 
     if (state.trends.length === 0) {
         container.innerHTML = `
@@ -154,7 +163,7 @@ function renderTrendFeed() {
             <li class="trend-entry">
                 <div class="te-header">
                     <span class="te-title">${link}</span>
-                    <span class="badge badge-${t.platform}">${t.platform}</span>
+                    <span class="badge badge-${t.platform}">${platformLabel(t.platform)}</span>
                 </div>
                 <div class="te-meta">
                     <span>Score: ${t.relevance_score}</span>
@@ -178,7 +187,8 @@ function renderChart(data) {
     if (state.chart) state.chart.destroy();
 
     if (data.timeline.length === 0) {
-        ctx.parentElement.innerHTML = `<p style="color:var(--text-dim);text-align:center;padding:40px">
+        ctx.parentElement.innerHTML = `<div class="chart-container"><canvas id="timeline-chart"></canvas></div>
+            <p style="color:var(--text-dim);text-align:center;padding:20px">
             No timeline data for this keyword yet. Check back after a few fetch cycles.</p>`;
         return;
     }
@@ -240,6 +250,9 @@ function renderChart(data) {
 
 function filterPlatform(platform) {
     state.platform = platform;
+    // Sync dropdown
+    const sel = document.getElementById("filter-platform");
+    if (sel) sel.value = platform || "";
     loadTrends();
     renderPlatformBar();
 }
@@ -249,19 +262,35 @@ function selectKeyword(keyword) {
 }
 
 function onFilterChange() {
+    const platform = document.getElementById("filter-platform").value;
     const category = document.getElementById("filter-category").value;
     const minScore = parseInt(document.getElementById("filter-score").value, 10);
     const hours = parseInt(document.getElementById("filter-hours").value, 10);
 
+    state.platform = platform || null;
     state.category = category || null;
     state.minScore = minScore;
     state.hours = hours;
 
+    renderPlatformBar();
     loadTopKeywords();
     loadTrends();
 }
 
 // ── Utilities ──
+
+const PLATFORM_LABELS = {
+    reddit: "Reddit",
+    twitter: "Twitter/X",
+    tiktok: "TikTok",
+    pinterest: "Pinterest",
+    threads: "Threads",
+    google_trends: "Google Trends",
+};
+
+function platformLabel(name) {
+    return PLATFORM_LABELS[name] || capitalize(name);
+}
 
 function capitalize(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);

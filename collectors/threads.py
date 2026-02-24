@@ -1,8 +1,10 @@
 """
 Threads collector using the Meta Threads API.
 
-Searches for romantasy-related posts on Threads.
+Uses the keyword search endpoint to find romantasy-related posts.
 Requires a Meta developer app with Threads API product enabled.
+
+Rate limit: 500 search queries per rolling 7-day window (~71/day).
 """
 
 import logging
@@ -15,7 +17,7 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
-THREADS_SEARCH_URL = "https://graph.threads.net/v1.0"
+THREADS_API_BASE = "https://graph.threads.net/v1.0"
 
 
 class ThreadsCollector(BaseCollector):
@@ -31,23 +33,22 @@ class ThreadsCollector(BaseCollector):
         trends = []
 
         async with httpx.AsyncClient(timeout=30) as client:
-            # The Threads API currently supports reading a user's own posts
-            # and searching by hashtag. We search hashtags relevant to romantasy.
-            for query in get_search_queries()[:10]:
+            # Use keyword search endpoint (added late 2024)
+            # Limited to ~71 queries/day (500/week rolling)
+            for query in get_search_queries()[:8]:
                 try:
-                    # Search via hashtag endpoint
-                    hashtag = query.replace(" ", "").lower()
                     resp = await client.get(
-                        f"{THREADS_SEARCH_URL}/tags/{hashtag}/threads",
+                        f"{THREADS_API_BASE}/search",
                         params={
-                            "fields": "id,text,timestamp,like_count,reply_count",
+                            "q": query,
+                            "fields": "id,text,timestamp,like_count,reply_count,repost_count",
                             "access_token": settings.THREADS_ACCESS_TOKEN,
                             "limit": 25,
                         },
                     )
 
                     if resp.status_code == 429:
-                        logger.warning("Threads: rate limited, stopping")
+                        logger.warning("Threads: rate limited (500/week cap), stopping")
                         break
 
                     if resp.status_code != 200:
@@ -59,11 +60,13 @@ class ThreadsCollector(BaseCollector):
                         engagement = (
                             post.get("like_count", 0)
                             + post.get("reply_count", 0)
+                            + post.get("repost_count", 0)
                         )
+                        post_id = post.get("id", "")
                         trends.append(self._make_trend(
                             keyword=query,
                             title=post.get("text", "")[:512],
-                            url=f"https://www.threads.net/post/{post.get('id', '')}",
+                            url=f"https://www.threads.net/post/{post_id}",
                             engagement=engagement,
                         ))
 

@@ -9,6 +9,7 @@ from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from analyzer.scorer import score_relevance
+from collectors.google_trends import GoogleTrendsCollector
 from collectors.pinterest import PinterestCollector
 from collectors.reddit import RedditCollector
 from collectors.threads import ThreadsCollector
@@ -26,6 +27,7 @@ ALL_COLLECTORS = [
     TikTokCollector(),
     PinterestCollector(),
     ThreadsCollector(),
+    GoogleTrendsCollector(),
 ]
 
 

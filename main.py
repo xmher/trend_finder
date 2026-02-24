@@ -160,6 +160,7 @@ def get_trend_timeline(
 @app.get("/api/platforms")
 async def get_platform_status(db: Session = Depends(get_db)):
     """Get the status of each platform collector."""
+    from collectors.google_trends import GoogleTrendsCollector
     from collectors.pinterest import PinterestCollector
     from collectors.reddit import RedditCollector
     from collectors.threads import ThreadsCollector
@@ -172,6 +173,7 @@ async def get_platform_status(db: Session = Depends(get_db)):
         TikTokCollector(),
         PinterestCollector(),
         ThreadsCollector(),
+        GoogleTrendsCollector(),
     ]
 
     platforms = []

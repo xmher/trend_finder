@@ -16,6 +16,7 @@
                 <span class="subtitle">Romantasy Print-on-Demand trend detection</span>
             </div>
             <div style="display:flex;gap:12px;align-items:center">
+                <span id="last-updated" class="subtitle"></span>
                 <button class="btn btn-primary" id="fetch-btn" onclick="triggerFetch()">
                     Fetch Now
                 </button>
@@ -29,6 +30,16 @@
 
         <!-- Filters -->
         <div class="filter-bar">
+            <select id="filter-platform" onchange="onFilterChange()">
+                <option value="">All Platforms</option>
+                <option value="reddit">Reddit</option>
+                <option value="twitter">Twitter/X</option>
+                <option value="tiktok">TikTok</option>
+                <option value="pinterest">Pinterest</option>
+                <option value="threads">Threads</option>
+                <option value="google_trends">Google Trends</option>
+            </select>
+
             <select id="filter-category" onchange="onFilterChange()">
                 <option value="">All Categories</option>
                 <option value="trope">Tropes</option>
@@ -63,7 +74,8 @@
                 <div id="top-keywords">
                     <div class="empty-state">
                         <h3>No trends yet</h3>
-                        <p>Add your API keys in .env and click "Fetch Now" to get started.</p>
+                        <p>Add your API keys in <code>.env</code> and click "Fetch Now" to get started.<br>
+                        Google Trends works immediately with no keys needed.</p>
                     </div>
                 </div>
             </div>
@@ -82,11 +94,45 @@
 
         <!-- Trend Feed (full width) -->
         <div class="card">
-            <h2>Latest Trends</h2>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <h2 style="margin-bottom:0">Latest Trends</h2>
+                <span id="trend-count" class="subtitle"></span>
+            </div>
             <div id="trend-feed">
                 <div class="empty-state">
                     <h3>Waiting for data</h3>
-                    <p>Trends from Reddit, Twitter/X, TikTok, Pinterest, and Threads will appear here once fetched.</p>
+                    <p>Trends from Reddit, Twitter/X, TikTok, Pinterest, Threads, and Google Trends will appear here once fetched.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Guide -->
+        <div class="card" id="setup-guide">
+            <h2>Quick Setup</h2>
+            <div class="setup-grid">
+                <div class="setup-item">
+                    <span class="setup-platform">Google Trends</span>
+                    <span class="setup-status ready">Ready (no key needed)</span>
+                </div>
+                <div class="setup-item">
+                    <span class="setup-platform">Reddit</span>
+                    <span class="setup-desc">Free — <a href="https://www.reddit.com/prefs/apps/" target="_blank">create app</a> (script type)</span>
+                </div>
+                <div class="setup-item">
+                    <span class="setup-platform">Pinterest</span>
+                    <span class="setup-desc">Free — <a href="https://developers.pinterest.com/" target="_blank">register app</a> (business account)</span>
+                </div>
+                <div class="setup-item">
+                    <span class="setup-platform">Threads</span>
+                    <span class="setup-desc">Free — <a href="https://developers.facebook.com/" target="_blank">create Meta app</a></span>
+                </div>
+                <div class="setup-item">
+                    <span class="setup-platform">TikTok</span>
+                    <span class="setup-desc"><a href="https://developers.tiktok.com/" target="_blank">Research API</a> (academic access only)</span>
+                </div>
+                <div class="setup-item">
+                    <span class="setup-platform">Twitter/X</span>
+                    <span class="setup-desc">$100+/mo — <a href="https://developer.x.com/" target="_blank">Basic tier</a> required for reads</span>
                 </div>
             </div>
         </div>

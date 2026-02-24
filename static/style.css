@@ -265,6 +265,7 @@ header .subtitle {
 .badge-tiktok { background: #25f4ee; color: black; }
 .badge-pinterest { background: #e60023; color: white; }
 .badge-threads { background: #333; color: white; }
+.badge-google_trends { background: #4285f4; color: white; }
 
 /* ── Score Bars ── */
 .score-bar {
@@ -313,6 +314,55 @@ header .subtitle {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* ── Setup Guide ── */
+.setup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.setup-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--bg);
+    font-size: 13px;
+}
+
+.setup-platform {
+    font-weight: 600;
+}
+
+.setup-desc {
+    color: var(--text-dim);
+    font-size: 12px;
+}
+
+.setup-desc a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.setup-desc a:hover {
+    text-decoration: underline;
+}
+
+.setup-status.ready {
+    color: var(--green);
+    font-weight: 600;
+    font-size: 12px;
+}
+
+code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: monospace;
 }
 
 /* ── Scrollbar ── */
