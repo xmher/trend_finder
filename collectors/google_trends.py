@@ -79,12 +79,15 @@ class GoogleTrendsCollector(BaseCollector):
                         for _, row in rising.head(10).iterrows():
                             query_text = row.get("query", "")
                             value = int(row.get("value", 0))
-                            trends.append(self._make_trend(
+                            trend = self._make_trend(
                                 keyword=query_text,
                                 title=f"Rising search: '{query_text}' (related to '{term}')",
                                 url=f"https://trends.google.com/trends/explore?q={query_text.replace(' ', '%20')}&geo=US",
                                 engagement=value,
-                            ))
+                            )
+                            trend["_source_type"] = "related_query"
+                            trend["_source_context"] = f"Rising query related to '{term}'"
+                            trends.append(trend)
             except Exception as e:
                 logger.warning(f"Google Trends related_queries failed: {e}")
 
@@ -94,12 +97,15 @@ class GoogleTrendsCollector(BaseCollector):
                 for _, row in trending.head(20).iterrows():
                     query_text = row.iloc[0] if len(row) > 0 else ""
                     if query_text:
-                        trends.append(self._make_trend(
+                        trend = self._make_trend(
                             keyword=str(query_text),
                             title=f"Trending search: {query_text}",
                             url=f"https://trends.google.com/trends/explore?q={str(query_text).replace(' ', '%20')}&geo=US",
                             engagement=0,
-                        ))
+                        )
+                        trend["_source_type"] = "trending_search"
+                        trend["_source_context"] = "Google daily trending search (US)"
+                        trends.append(trend)
             except Exception as e:
                 logger.warning(f"Google Trends trending_searches failed: {e}")
 

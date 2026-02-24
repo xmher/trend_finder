@@ -68,12 +68,15 @@ class PinterestCollector(BaseCollector):
                 keyword = trend.get("keyword", "")
                 # Pinterest gives normalized search volume
                 engagement = trend.get("value", 0)
-                trends.append(self._make_trend(
+                t = self._make_trend(
                     keyword=keyword,
                     title=f"Pinterest Trending: {keyword}",
                     url=f"https://www.pinterest.com/search/pins/?q={keyword.replace(' ', '%20')}",
                     engagement=engagement,
-                ))
+                )
+                t["_source_type"] = "pinterest_trend"
+                t["_source_context"] = "Pinterest growing trend (US)"
+                trends.append(t)
 
         except httpx.HTTPError as e:
             logger.warning(f"Pinterest trends request failed: {e}")
@@ -91,12 +94,15 @@ class PinterestCollector(BaseCollector):
                 for trend in data.get("trends", []):
                     keyword = trend.get("keyword", "")
                     engagement = trend.get("value", 0)
-                    trends.append(self._make_trend(
+                    t = self._make_trend(
                         keyword=keyword,
                         title=f"Pinterest Monthly Trend: {keyword}",
                         url=f"https://www.pinterest.com/search/pins/?q={keyword.replace(' ', '%20')}",
                         engagement=engagement,
-                    ))
+                    )
+                    t["_source_type"] = "pinterest_trend"
+                    t["_source_context"] = "Pinterest monthly trend (US)"
+                    trends.append(t)
         except httpx.HTTPError as e:
             logger.warning(f"Pinterest monthly trends failed: {e}")
 

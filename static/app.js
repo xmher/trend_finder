@@ -9,6 +9,7 @@ const state = {
     hours: 168,
     topKeywords: [],
     trends: [],
+    discoveries: [],
     platforms: [],
     chart: null,
 };
@@ -75,8 +76,18 @@ async function triggerFetch() {
     }, 5000);
 }
 
+async function loadDiscoveries() {
+    const filter = document.getElementById("discovery-filter");
+    const status = filter ? filter.value : "";
+    const params = new URLSearchParams({ min_confidence: 0, limit: 50 });
+    if (status) params.set("status", status);
+    const data = await api(`/api/discoveries?${params}`);
+    state.discoveries = data.discoveries;
+    renderDiscoveries();
+}
+
 async function refreshAll() {
-    await Promise.all([loadPlatforms(), loadTopKeywords(), loadTrends()]);
+    await Promise.all([loadPlatforms(), loadTopKeywords(), loadTrends(), loadDiscoveries()]);
     const el = document.getElementById("last-updated");
     if (el) el.textContent = `Updated ${new Date().toLocaleTimeString()}`;
 }
@@ -244,6 +255,77 @@ function renderChart(data) {
             },
         },
     });
+}
+
+function renderDiscoveries() {
+    const container = document.getElementById("discovery-feed");
+    const countEl = document.getElementById("discovery-count");
+    if (!container) return;
+
+    if (countEl) countEl.textContent = `${state.discoveries.length} found`;
+
+    if (state.discoveries.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>No discoveries yet</h3>
+                <p>After a fetch cycle, the discovery pipeline will surface trending keywords you didn't know about.</p>
+            </div>`;
+        return;
+    }
+
+    const items = state.discoveries.map(d => {
+        const confColor = d.confidence >= 60 ? "var(--green)" : d.confidence >= 35 ? "var(--orange)" : "var(--text-dim)";
+        const confBar = Math.max(4, (d.confidence / 100) * 100);
+        const platforms = d.platforms_seen.map(p =>
+            `<span class="badge badge-${p}">${platformLabel(p)}</span>`
+        ).join(" ");
+
+        const statusBadge = d.status === "promoted"
+            ? `<span class="disc-status promoted">promoted</span>`
+            : d.status === "dismissed"
+            ? `<span class="disc-status dismissed">dismissed</span>`
+            : "";
+
+        const actions = d.status === "new" ? `
+            <div class="disc-actions">
+                <button class="btn-sm btn-promote" onclick="promoteDiscovery(${d.id})">Promote</button>
+                <button class="btn-sm btn-dismiss" onclick="dismissDiscovery(${d.id})">Dismiss</button>
+            </div>` : "";
+
+        return `
+            <li class="disc-entry">
+                <div class="disc-header">
+                    <div>
+                        <span class="disc-keyword">${escHtml(d.keyword)}</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="disc-confidence" style="color:${confColor}">
+                        ${d.confidence.toFixed(0)}%
+                        <span class="conf-bar" style="width:${confBar}px;background:${confColor}"></span>
+                    </div>
+                </div>
+                <div class="disc-context">${escHtml(d.source_context)}</div>
+                <div class="disc-meta">
+                    ${platforms}
+                    <span>seen ${d.times_seen}x</span>
+                    ${d.peak_engagement > 0 ? `<span>${formatNum(d.peak_engagement)} peak eng.</span>` : ""}
+                    <span>first ${timeAgo(d.first_seen_at)}</span>
+                </div>
+                ${actions}
+            </li>`;
+    }).join("");
+
+    container.innerHTML = `<ul class="disc-list">${items}</ul>`;
+}
+
+async function promoteDiscovery(id) {
+    await fetch(`/api/discoveries/${id}/promote`, { method: "POST" });
+    loadDiscoveries();
+}
+
+async function dismissDiscovery(id) {
+    await fetch(`/api/discoveries/${id}/dismiss`, { method: "POST" });
+    loadDiscoveries();
 }
 
 // ── User actions ──

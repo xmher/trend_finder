@@ -51,6 +51,38 @@ class TrendSnapshot(Base):
     snapshot_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
+class DiscoveredKeyword(Base):
+    """A keyword surfaced by the discovery pipeline that isn't in the seed database."""
+    __tablename__ = "discovered_keywords"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    keyword = Column(String(256), nullable=False, unique=True, index=True)
+    source_platform = Column(String(32), nullable=False)          # which platform first found it
+    source_context = Column(String(512), default="")              # e.g. "rising query related to 'romantasy'"
+    confidence = Column(Float, default=0.0)                       # 0-100 how likely this is relevant
+    times_seen = Column(Integer, default=1)                       # how many fetch cycles it appeared in
+    peak_engagement = Column(Integer, default=0)                  # highest engagement seen
+    platforms_seen = Column(String(256), default="")              # comma-separated list of platforms
+    status = Column(String(16), default="new", index=True)        # new, promoted, dismissed
+    first_seen_at = Column(DateTime, default=datetime.utcnow)
+    last_seen_at = Column(DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "keyword": self.keyword,
+            "source_platform": self.source_platform,
+            "source_context": self.source_context,
+            "confidence": self.confidence,
+            "times_seen": self.times_seen,
+            "peak_engagement": self.peak_engagement,
+            "platforms_seen": self.platforms_seen.split(",") if self.platforms_seen else [],
+            "status": self.status,
+            "first_seen_at": self.first_seen_at.isoformat() if self.first_seen_at else None,
+            "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at else None,
+        }
+
+
 class FetchLog(Base):
     """Tracks when each platform was last fetched."""
     __tablename__ = "fetch_logs"

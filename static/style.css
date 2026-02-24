@@ -365,6 +365,119 @@ code {
     font-family: monospace;
 }
 
+/* ── Discovery Feed ── */
+#discovery-card {
+    margin-bottom: 32px;
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+.disc-list {
+    list-style: none;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.disc-entry {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.disc-entry:last-child { border-bottom: none; }
+
+.disc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.disc-keyword {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.disc-confidence {
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.conf-bar {
+    display: inline-block;
+    height: 6px;
+    border-radius: 3px;
+    min-width: 4px;
+}
+
+.disc-context {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+}
+
+.disc-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.disc-status {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+
+.disc-status.promoted { background: rgba(52, 211, 153, 0.2); color: var(--green); }
+.disc-status.dismissed { background: rgba(136, 136, 160, 0.2); color: var(--text-dim); }
+
+.disc-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-sm {
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-sm:hover {
+    border-color: var(--accent);
+}
+
+.btn-promote {
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.btn-promote:hover {
+    background: rgba(52, 211, 153, 0.15);
+}
+
+.btn-dismiss {
+    color: var(--text-dim);
+}
+
+.btn-dismiss:hover {
+    background: rgba(136, 136, 160, 0.1);
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

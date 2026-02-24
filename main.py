@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 from analyzer.scorer import rank_trends
 from config import settings
 from database import get_db, init_db
-from models import FetchLog, Trend, TrendSnapshot
+from models import DiscoveredKeyword, FetchLog, Trend, TrendSnapshot
 from scheduler import create_scheduler, fetch_all_trends
 
 logging.basicConfig(
@@ -203,6 +203,88 @@ async def trigger_fetch():
     """Manually trigger a trend fetch from all platforms."""
     asyncio.create_task(fetch_all_trends())
     return {"status": "started", "message": "Trend fetch started in background"}
+
+
+# ──────────────────────── Discovery Endpoints ────────────────────────
+
+
+@app.get("/api/discoveries")
+def get_discoveries(
+    db: Session = Depends(get_db),
+    status: str | None = Query(None),
+    min_confidence: float = Query(0),
+    limit: int = Query(50),
+):
+    """Get discovered keywords — novel trends not in the seed database."""
+    query = db.query(DiscoveredKeyword).filter(
+        DiscoveredKeyword.confidence >= min_confidence,
+    )
+    if status:
+        query = query.filter(DiscoveredKeyword.status == status)
+    else:
+        # By default, exclude dismissed
+        query = query.filter(DiscoveredKeyword.status != "dismissed")
+
+    results = (
+        query
+        .order_by(desc(DiscoveredKeyword.confidence), desc(DiscoveredKeyword.times_seen))
+        .limit(limit)
+        .all()
+    )
+
+    return {
+        "discoveries": [d.to_dict() for d in results],
+        "count": len(results),
+    }
+
+
+@app.post("/api/discoveries/{discovery_id}/promote")
+def promote_discovery(discovery_id: int, db: Session = Depends(get_db)):
+    """Mark a discovered keyword as promoted (worth tracking long-term)."""
+    disc = db.query(DiscoveredKeyword).filter(DiscoveredKeyword.id == discovery_id).first()
+    if not disc:
+        return {"error": "Not found"}, 404
+    disc.status = "promoted"
+    db.commit()
+    return {"status": "promoted", "keyword": disc.keyword}
+
+
+@app.post("/api/discoveries/{discovery_id}/dismiss")
+def dismiss_discovery(discovery_id: int, db: Session = Depends(get_db)):
+    """Dismiss a discovered keyword as not relevant."""
+    disc = db.query(DiscoveredKeyword).filter(DiscoveredKeyword.id == discovery_id).first()
+    if not disc:
+        return {"error": "Not found"}, 404
+    disc.status = "dismissed"
+    db.commit()
+    return {"status": "dismissed", "keyword": disc.keyword}
+
+
+@app.get("/api/discoveries/stats")
+def get_discovery_stats(db: Session = Depends(get_db)):
+    """Get summary stats for the discovery pipeline."""
+    total = db.query(func.count(DiscoveredKeyword.id)).scalar() or 0
+    new_count = (
+        db.query(func.count(DiscoveredKeyword.id))
+        .filter(DiscoveredKeyword.status == "new")
+        .scalar() or 0
+    )
+    promoted_count = (
+        db.query(func.count(DiscoveredKeyword.id))
+        .filter(DiscoveredKeyword.status == "promoted")
+        .scalar() or 0
+    )
+    high_confidence = (
+        db.query(func.count(DiscoveredKeyword.id))
+        .filter(DiscoveredKeyword.confidence >= 60)
+        .scalar() or 0
+    )
+    return {
+        "total": total,
+        "new": new_count,
+        "promoted": promoted_count,
+        "high_confidence": high_confidence,
+    }
 
 
 @app.get("/api/categories")
