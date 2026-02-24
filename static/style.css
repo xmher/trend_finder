@@ -1,0 +1,322 @@
+:root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface-hover: #22222e;
+    --border: #2a2a3a;
+    --text: #e4e4ef;
+    --text-dim: #8888a0;
+    --accent: #a855f7;
+    --accent-glow: rgba(168, 85, 247, 0.15);
+    --green: #34d399;
+    --red: #f87171;
+    --orange: #fbbf24;
+    --blue: #60a5fa;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* ── Layout ── */
+.app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+header .subtitle {
+    color: var(--text-dim);
+    font-size: 14px;
+}
+
+/* ── Buttons ── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+}
+
+.btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Platform Status Bar ── */
+.platform-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.platform-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.platform-chip:hover, .platform-chip.active {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+}
+
+.platform-chip .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot.connected { background: var(--green); }
+.dot.disconnected { background: var(--red); }
+
+/* ── Filter Bar ── */
+.filter-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-bar select, .filter-bar input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+}
+
+/* ── Grid Layout ── */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+}
+
+/* ── Cards ── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-dim);
+}
+
+/* ── Top Keywords Table ── */
+.keyword-list {
+    list-style: none;
+}
+
+.keyword-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.keyword-item:last-child { border-bottom: none; }
+
+.keyword-item:hover {
+    background: var(--accent-glow);
+    margin: 0 -12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+}
+
+.keyword-item .kw-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.keyword-item .kw-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.keyword-item .kw-score {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* ── Trend Feed ── */
+.trend-feed {
+    list-style: none;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.trend-entry {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.trend-entry:last-child { border-bottom: none; }
+
+.trend-entry .te-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 4px;
+}
+
+.trend-entry .te-title {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.trend-entry .te-title a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.trend-entry .te-title a:hover {
+    color: var(--accent);
+}
+
+.trend-entry .te-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-reddit { background: #ff4500; color: white; }
+.badge-twitter { background: #1d9bf0; color: white; }
+.badge-tiktok { background: #25f4ee; color: black; }
+.badge-pinterest { background: #e60023; color: white; }
+.badge-threads { background: #333; color: white; }
+
+/* ── Score Bars ── */
+.score-bar {
+    display: inline-block;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--accent);
+    min-width: 4px;
+}
+
+/* ── Chart Container ── */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* ── Empty State ── */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-dim);
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.empty-state p {
+    font-size: 14px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* ── Loading spinner ── */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
